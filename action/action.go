@@ -14,7 +14,8 @@ import (
 // ResFollowEvent followEventに対して応答
 func (i *InitLinebot) ResFollowEvent(event *linebot.Event) {
 	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("友達追加ありがとうございます。")).Do(); err != nil {
-		log.Print(err)
+		i.resErrMessage(event, err)
+		return
 	}
 }
 
@@ -46,7 +47,8 @@ func (i *InitLinebot) ResPostBackEvent(event *linebot.Event) {
 			),
 		),
 	)).Do(); err != nil {
-		log.Print(err)
+		i.resErrMessage(event, err)
+		return
 	}
 }
 
@@ -56,11 +58,13 @@ func (i *InitLinebot) resTextMessage(message *linebot.TextMessage, event *linebo
 		userID := event.Source.UserID
 		profile, _ := i.Bot.GetProfile(userID).Do()
 		if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("あなたの名前は「"+profile.DisplayName+"」\n"+"あなたのIDは「"+userID+"」です。")).Do(); err != nil {
-			log.Print(err)
+			i.resErrMessage(event, err)
+			return
 		}
 	} else {
 		if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("ユーザー情報を取得したい場合は「情報」と入力してください。")).Do(); err != nil {
-			log.Print(err)
+			i.resErrMessage(event, err)
+			return
 		}
 	}
 }
@@ -86,6 +90,15 @@ func (i *InitLinebot) resImageMessage(event *linebot.Event) {
 				""),
 		),
 	)).Do(); err != nil {
+		i.resErrMessage(event, err)
+		return
+	}
+}
+
+// resErrMessage エラーが発生した旨を返す
+func (i *InitLinebot) resErrMessage(event *linebot.Event, err error) {
+	log.Print(err)
+	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("エラーが発生したため再度メッセージを送信してください。")).Do(); err != nil {
 		log.Print(err)
 	}
 }

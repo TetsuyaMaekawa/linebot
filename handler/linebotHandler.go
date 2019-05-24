@@ -31,21 +31,23 @@ func (in *InitDB) Linebothandler() {
 
 		// requesut取得
 		events, err := bot.ParseRequest(r)
-		if err != nil {
+		if err == nil {
+			// event毎に処理分岐
+			for _, event := range events {
+				switch event.Type {
+				case linebot.EventTypeFollow:
+					i.ResFollowEvent(event)
+				case linebot.EventTypeMessage:
+					i.ResMessageEvent(event)
+				case linebot.EventTypePostback:
+					i.ResPostBackEvent(event)
+				default:
+				}
+			}
+		} else {
 			log.Print(err)
 		}
-		// event毎に処理分岐
-		for _, event := range events {
-			switch event.Type {
-			case linebot.EventTypeFollow:
-				i.ResFollowEvent(event)
-			case linebot.EventTypeMessage:
-				i.ResMessageEvent(event)
-			case linebot.EventTypePostback:
-				i.ResPostBackEvent(event)
-			default:
-			}
-		}
+
 	})
 	goji.Serve()
 }
