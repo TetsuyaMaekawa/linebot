@@ -11,69 +11,69 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
-// ResFollowEvent followEventに対して応答
-func (i *InitLinebot) ResFollowEvent(event *linebot.Event) {
-	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("友達追加ありがとうございます。")).Do(); err != nil {
-		i.resErrMessage(event, err)
+// ResponseToFollowEvent followEventに対して応答
+func (configAction *ConfigAction) ResponseToFollowEvent(event *linebot.Event) {
+	if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("友達追加ありがとうございます。")).Do(); err != nil {
+		configAction.replyErrMessage(event, err)
 		return
 	}
 }
 
-// ResMessageEvent messageEventに対して応答
-func (i *InitLinebot) ResMessageEvent(event *linebot.Event) {
+// ResponseToMessageEvent messageEventに対して応答
+func (configAction *ConfigAction) ResponseToMessageEvent(event *linebot.Event) {
 	switch message := event.Message.(type) {
 	case *linebot.TextMessage:
-		i.resTextMessage(message, event)
+		configAction.responseToTextMessage(message, event)
 	case *linebot.ImageMessage:
-		i.resImageMessage(event)
+		configAction.responseToImageMessage(event)
 	}
 }
 
-// ResPostBackEvent postBackEventに対して応答
-func (i *InitLinebot) ResPostBackEvent(event *linebot.Event) {
+// ResponseToPostBackEvent postBackEventに対して応答
+func (configAction *ConfigAction) ResponseToPostBackEvent(event *linebot.Event) {
 
 	key := "key1"
-	myredis.SetKeyValue(key, "value1", i.RD)
+	myredis.SetKeyValue(key, "value1", configAction.RedisDb)
 
-	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTemplateMessage(
+	if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTemplateMessage(
 		"this is a confilm template",
 		linebot.NewConfirmTemplate(
 			"key oa value",
 			linebot.NewMessageAction(
-				"key", myredis.GetKey(key, i.RD),
+				"key", myredis.GetKey(key, configAction.RedisDb),
 			),
 			linebot.NewMessageAction(
-				"value", myredis.GetValue(key, i.RD),
+				"value", myredis.GetValue(key, configAction.RedisDb),
 			),
 		),
 	)).Do(); err != nil {
-		i.resErrMessage(event, err)
+		configAction.replyErrMessage(event, err)
 		return
 	}
 }
 
-// resTextMessage textMessageの時に応答
-func (i *InitLinebot) resTextMessage(message *linebot.TextMessage, event *linebot.Event) {
+// responseToTextMessage textMessageの時に応答
+func (configAction *ConfigAction) responseToTextMessage(message *linebot.TextMessage, event *linebot.Event) {
 	if message.Text == "情報" {
 		userID := event.Source.UserID
-		profile, _ := i.Bot.GetProfile(userID).Do()
-		if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("あなたの名前は「"+profile.DisplayName+"」\n"+"あなたのIDは「"+userID+"」です。")).Do(); err != nil {
-			i.resErrMessage(event, err)
+		profile, _ := configAction.Bot.GetProfile(userID).Do()
+		if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("あなたの名前は「"+profile.DisplayName+"」\n"+"あなたのIDは「"+userID+"」です。")).Do(); err != nil {
+			configAction.replyErrMessage(event, err)
 			return
 		}
 	} else {
-		if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("ユーザー情報を取得したい場合は「情報」と入力してください。")).Do(); err != nil {
-			i.resErrMessage(event, err)
+		if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("ユーザー情報を取得したい場合は「情報」と入力してください。")).Do(); err != nil {
+			configAction.replyErrMessage(event, err)
 			return
 		}
 	}
 }
 
-// resImageMessage imageMessageの時に応答
-func (i *InitLinebot) resImageMessage(event *linebot.Event) {
+// responseToImageMessage imageMessageの時に応答
+func (configAction *ConfigAction) responseToImageMessage(event *linebot.Event) {
 	m := mysql.Mytable{}
-	i.DB.First(&m, "id=?", 1)
-	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTemplateMessage(
+	configAction.MySQLDb.First(&m, "id=?", 1)
+	if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTemplateMessage(
 		"this is a buttons template",
 		linebot.NewButtonsTemplate(
 			"",
@@ -90,22 +90,22 @@ func (i *InitLinebot) resImageMessage(event *linebot.Event) {
 				""),
 		),
 	)).Do(); err != nil {
-		i.resErrMessage(event, err)
+		configAction.replyErrMessage(event, err)
 		return
 	}
 }
 
-// resErrMessage エラーが発生した旨を返す
-func (i *InitLinebot) resErrMessage(event *linebot.Event, err error) {
+// replyErrMessage エラーが発生した旨を返す
+func (configAction *ConfigAction) replyErrMessage(event *linebot.Event, err error) {
 	log.Print(err)
-	if _, err := i.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("エラーが発生したため再度メッセージを送信してください。")).Do(); err != nil {
+	if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("エラーが発生したため再度メッセージを送信してください。")).Do(); err != nil {
 		log.Print(err)
 	}
 }
 
-// InitLinebot ClientとEventを保持
-type InitLinebot struct {
-	Bot *linebot.Client
-	DB  *gorm.DB
-	RD  *redis.Pool
+// ConfigAction ClientとEventを保持
+type ConfigAction struct {
+	Bot     *linebot.Client
+	MySQLDb *gorm.DB
+	RedisDb *redis.Pool
 }

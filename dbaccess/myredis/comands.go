@@ -7,24 +7,24 @@ import (
 )
 
 // SetKeyValue expireを30秒とし値をセット
-func SetKeyValue(key, value string, RD *redis.Pool) {
-	conn := RD.Get()
+func SetKeyValue(key, value string, redisDb *redis.Pool) {
+	conn := redisDb.Get()
 	conn.Do("SETEX", key, 30, value)
 }
 
 // GetKey キーを取得
-func GetKey(key string, RD *redis.Pool) string {
-	conn := RD.Get()
-	rtnStr, err := redis.Strings(conn.Do("KEYS", key))
+func GetKey(key string, redisDb *redis.Pool) string {
+	conn := redisDb.Get()
+	strArry, err := redis.Strings(conn.Do("KEYS", key))
 	if err != nil {
 		log.Print(err)
 	}
-	return rtnStr[0]
+	return strArry[0]
 }
 
 // GetValue バリューを取得
-func GetValue(key string, RD *redis.Pool) string {
-	conn := RD.Get()
+func GetValue(key string, redisDb *redis.Pool) string {
+	conn := redisDb.Get()
 	rtnStr, err := redis.String(conn.Do("GET", key))
 	if err != nil {
 		log.Print(err)

@@ -10,17 +10,17 @@ import (
 
 func main() {
 	// db接続
-	db, err := mysql.OpenMySQL()
+	mysqlDb, err := mysql.OpenMySQL()
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	rd, err := myredis.OpenRedis()
+	redisDb, err := myredis.OpenRedis()
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	in := handler.InitDB{DB: db, RD: rd}
-	// linebothandleの呼び出し
-	in.Linebothandler()
+	dbs := handler.DBs{MySQLDb: mysqlDb, RedisDb: redisDb}
+	// HandlingLinebotの呼び出し
+	dbs.HandlingLinebot()
 }

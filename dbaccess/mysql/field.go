@@ -7,6 +7,6 @@ type Mytable struct {
 }
 
 // TableName ...
-func (m *Mytable) TableName() string {
+func (mytable *Mytable) TableName() string {
 	return "mytable"
 }

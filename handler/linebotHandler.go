@@ -12,8 +12,8 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
-// Linebothandler LINEからのリクエストを受けて応答をハンドリング
-func (in *InitDB) Linebothandler() {
+// HandlingLinebot LINEからのリクエストを受けて応答をハンドリング
+func (dbs *DBs) HandlingLinebot() {
 
 	// client生成
 	bot, err := linebot.New("0189c809a76170e6c965b62ac5c9f670",
@@ -24,23 +24,23 @@ func (in *InitDB) Linebothandler() {
 		return
 	}
 
-	i := action.InitLinebot{Bot: bot, DB: in.DB, RD: in.RD}
+	configAction := action.ConfigAction{Bot: bot, MySQLDb: dbs.MySQLDb, RedisDb: dbs.RedisDb}
 
 	// // Postのルーティング
-	goji.Post("/callback", func(c web.C, w http.ResponseWriter, r *http.Request) {
+	goji.Post("/callback", func(context web.C, writer http.ResponseWriter, request *http.Request) {
 
-		// requesut取得
-		events, err := bot.ParseRequest(r)
+		// request取得
+		events, err := bot.ParseRequest(request)
 		if err == nil {
 			// event毎に処理分岐
 			for _, event := range events {
 				switch event.Type {
 				case linebot.EventTypeFollow:
-					i.ResFollowEvent(event)
+					configAction.ResponseToFollowEvent(event)
 				case linebot.EventTypeMessage:
-					i.ResMessageEvent(event)
+					configAction.ResponseToMessageEvent(event)
 				case linebot.EventTypePostback:
-					i.ResPostBackEvent(event)
+					configAction.ResponseToPostBackEvent(event)
 				default:
 				}
 			}
@@ -52,8 +52,8 @@ func (in *InitDB) Linebothandler() {
 	goji.Serve()
 }
 
-// InitDB ...
-type InitDB struct {
-	DB *gorm.DB
-	RD *redis.Pool
+// DBs ...
+type DBs struct {
+	MySQLDb *gorm.DB
+	RedisDb *redis.Pool
 }
