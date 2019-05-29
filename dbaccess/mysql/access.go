@@ -9,7 +9,7 @@ import (
 
 // OpenMySQL MySQLとの接続を確立
 func OpenMySQL() (*gorm.DB, error) {
-	mySQLDb, err := gorm.Open("mysql", "root:Ah4vn3tetsuya@/mydb?charset=utf8&parseTime=True&loc=Local")
+	mySQLDb, err := gorm.Open("mysql", "root:@/mydb?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		log.Print(err)
 		return nil, err

@@ -14,16 +14,12 @@ import (
 
 // HandlingLinebot LINEからのリクエストを受けて応答をハンドリング
 func (dbs *DBs) HandlingLinebot() {
-
 	// client生成
-	bot, err := linebot.New("0189c809a76170e6c965b62ac5c9f670",
-		"hJ5OAGDvemzFZidHYjg1Ihr5SoHs9eqsgUuok/LoW4uXzKD3lEZpqyqDMKti8Q/bp0rb4aVW2zsjFroGMoi5xTZqdWVrGy/CQE/EbozdNI3+Fyvq7sd4O/5EHyFpZ9mMwA7snSk+JzX8WJjNyXUJJAdB04t89/1O/w1cDnyilFU=",
-	)
+	bot, err := linebot.New("", "")
 	if err != nil {
 		log.Print(err)
 		return
 	}
-
 	configAction := action.ConfigAction{Bot: bot, MySQLDb: dbs.MySQLDb, RedisDb: dbs.RedisDb}
 
 	// // Postのルーティング
@@ -47,7 +43,6 @@ func (dbs *DBs) HandlingLinebot() {
 		} else {
 			log.Print(err)
 		}
-
 	})
 	goji.Serve()
 }

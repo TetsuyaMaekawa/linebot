@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/garyburd/redigo/redis"
@@ -57,7 +58,11 @@ func (configAction *ConfigAction) responseToTextMessage(message *linebot.TextMes
 	if message.Text == "情報" {
 		userID := event.Source.UserID
 		profile, _ := configAction.Bot.GetProfile(userID).Do()
-		if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("あなたの名前は「"+profile.DisplayName+"」\n"+"あなたのIDは「"+userID+"」です。")).Do(); err != nil {
+		// if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("あなたの名前は「"+profile.DisplayName+"」\n"+"あなたのIDは「"+userID+"」です。")).Do(); err != nil {
+		// 	configAction.replyErrMessage(event, err)
+		// 	return
+		// }
+		if _, err := configAction.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("あなたの名前は「%v」 \nあなたのIDは「%v」です。", profile.DisplayName, userID))).Do(); err != nil {
 			configAction.replyErrMessage(event, err)
 			return
 		}
